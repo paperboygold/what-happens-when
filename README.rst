@@ -842,57 +842,76 @@ page rendering and painting.
 
 The rendering pipeline has evolved while maintaining the same fundamental steps:
 
-1. **Construction Phase**
-   * HTML parsing → DOM Tree (as described above)
-   * CSS parsing → CSSOM (as described above)
-   * JavaScript execution (can block parsing)
-   * Render Tree construction
-   * Layout computation
-   * Layer Tree creation
+1. Construction Phase
+~~~~~~~~~~~~~~~~~~~
 
-2. **Rasterization Phase**
-   * Layer decomposition based on:
-     - CSS properties (transform, opacity, etc.)
-     - Compositing requirements
-     - Hardware acceleration hints
-   * Independent layer rasterization
-   * Texture atlas management
-   * GPU-accelerated compositing
+* HTML parsing to DOM Tree (as described above)
+* CSS parsing to CSSOM (as described above) 
+* JavaScript execution (can block parsing)
+* Render Tree construction
+* Layout computation
+* Layer Tree creation
 
-3. **Compositing Phase**
-   * Runs on dedicated compositor thread
-   * Handles:
-     - Scroll synchronization
-     - Animation updates
-     - Layer positioning
-     - Final composition
-   * Direct GPU communication via command buffers
+2. Rasterization Phase
+~~~~~~~~~~~~~~~~~~~~~
 
-**Resource Loading and Performance**
+* Layer decomposition based on:
+
+  * CSS properties (transform, opacity, etc.)
+  * Compositing requirements 
+  * Hardware acceleration hints
+
+* Independent layer rasterization
+* Texture atlas management
+* GPU-accelerated compositing
+
+3. Compositing Phase
+~~~~~~~~~~~~~~~~~~~
+
+* Runs on dedicated compositor thread
+* Handles:
+
+  * Scroll synchronization
+  * Animation updates
+  * Layer positioning
+  * Final composition
+
+* Direct GPU communication via command buffers
+
+Resource Loading and Performance
+------------------------------
 
 Modern browsers implement sophisticated loading optimizations:
 
-* **Preload Scanner:**
-    - Parallel HTML scanning for resource discovery
-    - Speculative parsing and loading
-    - Support for `<link rel="preload">` hints
+Preload Scanner
+~~~~~~~~~~~~~~
 
-* **Loading Priorities:**
-    - Critical path optimization
-    - Resource hints (preconnect/prefetch/prerender)
-    - Bandwidth estimation and adaptation
+* Parallel HTML scanning for resource discovery
+* Speculative parsing and loading
+* Support for ``<link rel="preload">`` hints
 
-* **Execution Optimization:**
-    - Script streaming and compilation
-    - Module graph optimization
-    - Code caching
-    - Bytecode generation
+Loading Priorities
+~~~~~~~~~~~~~~~~
 
-* **Performance Monitoring:**
-    - Long Tasks API
-    - Performance Timeline
-    - Paint Timing
-    - Layout Instability
+* Critical path optimization
+* Resource hints (preconnect/prefetch/prerender)
+* Bandwidth estimation and adaptation
+
+Execution Optimization
+~~~~~~~~~~~~~~~~~~~~
+
+* Script streaming and compilation
+* Module graph optimization
+* Code caching
+* Bytecode generation
+
+Performance Monitoring
+~~~~~~~~~~~~~~~~~~~~
+
+* Long Tasks API
+* Performance Timeline  
+* Paint Timing
+* Layout Instability
 
 .. _`Creative Commons Zero`: https://creativecommons.org/publicdomain/zero/1.0/
 .. _`"CSS lexical and syntax grammar"`: http://www.w3.org/TR/CSS2/grammar.html
