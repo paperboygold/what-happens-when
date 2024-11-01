@@ -176,6 +176,14 @@ the text given in the address box to the browser's default web search engine.
 In many cases the URL has a special piece of text appended to it to tell the
 search engine that it came from a particular browser's URL bar.
 
+The browser first checks if the input matches any of these patterns:
+* Contains a valid protocol (http://, https://, ftp://, etc.)
+* Contains a known TLD (.com, .org, .edu, etc.)
+* Contains localhost or an IP address
+* Matches a cached DNS entry
+
+If none of these patterns match, the browser treats the input as a search term and redirects to the default search engine with the input as the query parameter.
+
 Convert non-ASCII Unicode characters in the hostname
 ------------------------------------------------
 
@@ -505,8 +513,14 @@ TLS handshake
   contains a public key that will be used by the client to encrypt the rest of
   the handshake until a symmetric key can be agreed upon.
 
-* The client verifies the server digital certificate against its list of
-  trusted CAs. If trust can be established based on the CA, the client
+* The client verifies the server digital certificate through several steps:
+   1. Checks if the certificate's issuer is in its trusted root store
+   2. Verifies the certificate chain up to a trusted root CA
+   3. Checks the certificate's validity period
+   4. Verifies the certificate hasn't been revoked (through OCSP or CRL)
+   5. Confirms the certificate's domain matches the server's domain
+
+* If trust can be established based on the CA verification, the client
   generates a string of pseudo-random bytes and encrypts this with the server's
   public key. These random bytes can be used to determine the symmetric key.
 
