@@ -7,7 +7,7 @@ enter?"
 
 Except instead of the usual story, we're going to try to answer this question
 in as much detail as possible. No skipping out on anything. In this particular
-version we aim to capture the security aspects of the process.
+version we aim to capture the security aspects of the process based on the original available `here <https://github.com/alex/what-happens-when>`_
 
 This is all licensed under the terms of the `Creative Commons Zero`_ license.
 
