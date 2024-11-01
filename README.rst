@@ -691,6 +691,33 @@ The components of the browsers are:
   support storage mechanisms such as localStorage, IndexedDB, WebSQL and
   FileSystem.
 
+**Modern Browser Architecture**
+
+Modern browsers employ a multi-process architecture for security isolation and stability:
+
+* **Browser Process:** Controls chrome UI, manages child processes, handles 
+  privileged operations
+* **Renderer Process:** Runs in a sandboxed environment, one or more per tab
+* **GPU Process:** Handles accelerated rendering across all processes
+* **Network Process:** Manages network stack, implements security protocols
+* **Storage Process:** Controls access to persistent storage
+* **Utility Processes:** Handle various tasks like audio, plugins, extensions
+
+The classic browser components remain present within this architecture:
+
+* **Browser engine:** Modern engines like Blink (Chrome/Edge) and Gecko (Firefox) 
+  implement process isolation and task prioritization. The engine coordinates:
+    - Process management and IPC
+    - Resource loading prioritization
+    - Security policy enforcement
+    - Performance monitoring
+
+* **Rendering engine:** Now heavily optimized with:
+    - Compositor thread for smooth scrolling/animations
+    - Layer-based architecture for GPU acceleration
+    - Parallel processing of parsing/style/layout where possible
+    - Incremental rendering for better perceived performance
+
 HTML parsing
 ------------
 
@@ -808,6 +835,62 @@ Plugins such as Flash or Java may execute as well, although not at this time on
 the Google homepage. Scripts can cause additional network requests to be
 performed, as well as modify the page or its layout, causing another round of
 page rendering and painting.
+
+**Modern Rendering Pipeline**
+
+The rendering pipeline has evolved while maintaining the same fundamental steps:
+
+1. **Construction Phase**
+   * HTML parsing → DOM Tree (as described above)
+   * CSS parsing → CSSOM (as described above)
+   * JavaScript execution (can block parsing)
+   * Render Tree construction
+   * Layout computation
+   * Layer Tree creation
+
+2. **Rasterization Phase**
+   * Layer decomposition based on:
+     - CSS properties (transform, opacity, etc.)
+     - Compositing requirements
+     - Hardware acceleration hints
+   * Independent layer rasterization
+   * Texture atlas management
+   * GPU-accelerated compositing
+
+3. **Compositing Phase**
+   * Runs on dedicated compositor thread
+   * Handles:
+     - Scroll synchronization
+     - Animation updates
+     - Layer positioning
+     - Final composition
+   * Direct GPU communication via command buffers
+
+**Resource Loading and Performance**
+
+Modern browsers implement sophisticated loading optimizations:
+
+* **Preload Scanner:**
+    - Parallel HTML scanning for resource discovery
+    - Speculative parsing and loading
+    - Support for `<link rel="preload">` hints
+
+* **Loading Priorities:**
+    - Critical path optimization
+    - Resource hints (preconnect/prefetch/prerender)
+    - Bandwidth estimation and adaptation
+
+* **Execution Optimization:**
+    - Script streaming and compilation
+    - Module graph optimization
+    - Code caching
+    - Bytecode generation
+
+* **Performance Monitoring:**
+    - Long Tasks API
+    - Performance Timeline
+    - Paint Timing
+    - Layout Instability
 
 .. _`Creative Commons Zero`: https://creativecommons.org/publicdomain/zero/1.0/
 .. _`"CSS lexical and syntax grammar"`: http://www.w3.org/TR/CSS2/grammar.html
