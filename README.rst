@@ -821,10 +821,6 @@ GPU Rendering
   of ``GPU`` massive parallelism for float point calculations required for
   the rendering process.
 
-
-Window Server
--------------
-
 Post-rendering and user-induced execution
 -----------------------------------------
 
@@ -906,9 +902,5 @@ Modern browsers implement sophisticated loading optimizations:
 .. _`congestion window`: https://en.wikipedia.org/wiki/TCP_congestion_control#Congestion_window
 .. _`maximum segment size`: https://en.wikipedia.org/wiki/Maximum_segment_size
 .. _`varies by OS` : https://en.wikipedia.org/wiki/Hosts_%28file%29#Location_in_the_file_system
-.. _`简体中文`: https://github.com/skyline75489/what-happens-when-zh_CN
-.. _`한국어`: https://github.com/SantonyChoi/what-happens-when-KR
-.. _`日本語`: https://github.com/tettttsuo/what-happens-when-JA
 .. _`downgrade attack`: http://en.wikipedia.org/wiki/SSL_stripping
 .. _`OSI Model`: https://en.wikipedia.org/wiki/OSI_model
-.. _`Spanish`: https://github.com/gonzaleztroyano/what-happens-when-ES
