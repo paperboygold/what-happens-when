@@ -32,6 +32,58 @@ popular searches from the internet as a whole. As you are typing
 with each keypress. It may even suggest "google.com" before you finish typing
 it.
 
+Security Considerations:
+~~~~~~~~~~~~~~~~~~~~~~
+
+* Hardware Level:
+    - Physical keyloggers can intercept keystrokes before they reach the OS
+    - Malicious firmware in USB keyboards can:
+        * Log keystrokes
+        * Inject additional keystrokes
+        * Modify keystroke data
+    - Hardware timing attacks can potentially recover keystrokes through:
+        * Power analysis
+        * Electromagnetic emissions
+        * Acoustic analysis
+
+* Operating System Level:
+    - Kernel-mode keyloggers can intercept keystrokes through:
+        * Keyboard device drivers
+        * Input method hooks
+        * Raw input handlers
+    - Keystroke injection attacks possible through:
+        * Compromised keyboard drivers
+        * Virtual keyboard devices
+        * Input simulation APIs
+
+* Application Level:
+    - JavaScript keyloggers can capture keystrokes through:
+        * KeyboardEvent listeners
+        * Input element monitoring
+        * Clipboard access
+    - Browser extensions can:
+        * Monitor all keyboard input
+        * Modify keyboard events
+        * Inject synthetic events
+
+Mitigations:
+~~~~~~~~~~~
+
+* Hardware:
+    - Use trusted hardware vendors
+    - Implement USB device whitelisting
+    - Enable USB device encryption where available
+
+* Operating System:
+    - Implement access controls on keyboard devices
+    - Monitor for unauthorized keyboard drivers
+    - Use secure input methods for sensitive data
+
+* Application:
+    - Implement Content Security Policy (CSP) restrictions
+    - Validate input handling in browser extensions
+    - Use virtual keyboards for sensitive input
+
 The "enter" key bottoms out
 ---------------------------
 
@@ -358,6 +410,14 @@ These modern protocols affect connection metrics:
 
 The browser maintains statistics about protocol success rates and adjusts fallback behavior accordingly.
 
+DNS Security Considerations:
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* DNS Poisoning Risks:
+    - Cache poisoning attacks possible during resolution
+    - DNSSEC validation should be enabled to verify DNS responses
+    - Requires proper resolver configuration and validation
+
 ARP process
 -----------
 
@@ -501,6 +561,20 @@ This send and receive happens multiple times following the TCP connection flow:
    * The other sides ACKs the FIN packet and sends its own FIN
    * The closer acknowledges the other side's FIN with an ACK
 
+Network Security Requirements:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Protocol Enforcement:
+    - Enforce HTTPS with HSTS preloading
+    - Implement certificate pinning
+    - Enable modern protocols (HTTP/3, TLS 1.3)
+    - Disable legacy protocol versions
+
+* Input Validation:
+    - Implement strict input validation
+    - Sanitize all user-provided data
+    - Validate content-types and encodings
+
 TLS handshake
 -------------
 * The client computer sends a ``ClientHello`` message to the server with its
@@ -519,6 +593,25 @@ TLS handshake
    3. Checks the certificate's validity period
    4. Verifies the certificate hasn't been revoked (through OCSP or CRL)
    5. Confirms the certificate's domain matches the server's domain
+
+Security Considerations:
+~~~~~~~~~~~~~~~~~~~~~~
+
+* Protocol Downgrade Vulnerabilities:
+   - Attackers can force connections to use weaker protocols through POODLE-style attacks
+   - The TLS_FALLBACK_SCSV cipher suite value prevents downgrade attacks
+   - Servers should disable SSLv2, SSLv3, and TLS 1.0/1.1
+
+* Certificate Validation Attacks:
+   - Compromised CAs can issue fraudulent certificates
+   - Hash collision attacks against older signature algorithms (MD5, SHA-1)
+   - Certificate pinning helps prevent unauthorized certificate changes
+   - Certificate Transparency logs provide public audit records
+
+* Cryptographic Weaknesses:
+   - CBC mode ciphers vulnerable to padding oracle attacks
+   - RC4 stream cipher has biases making it cryptographically weak
+   - Export-grade cipher suites can be forcibly enabled (FREAK attack)
 
 * If trust can be established based on the CA verification, the client
   generates a string of pseudo-random bytes and encrypts this with the server's
@@ -561,6 +654,26 @@ If the web browser used was written by Google, instead of sending an HTTP
 request to retrieve the page, it will first attempt to negotiate HTTP/3, 
 then fall back to HTTP/2, and finally HTTP/1.1 if needed.
 
+Security Considerations:
+~~~~~~~~~~~~~~~~~~~~~~
+
+* Protocol Downgrade Attacks:
+    - Forced downgrades from HTTP/3 to HTTP/1.1 can expose legacy vulnerabilities
+    - HTTP/2 Dependency DoS attacks possible through stream prioritization
+    - Mitigated through strict protocol negotiation and version enforcement
+
+* Request Smuggling:
+    - Inconsistent parsing between front/back-end servers enables request smuggling
+    - Transfer-Encoding vs Content-Length conflicts
+    - Chunked encoding ambiguities
+    - Critical for servers using multiple HTTP parsing layers
+
+* Header Injection:
+    - CRLF injection in header values can lead to response splitting
+    - Header value smuggling through line folding
+    - Oversized header attacks for DoS
+    - Requires strict header validation and size limits
+
 If the client is using HTTP/1.1, it sends a request to the server of the form:
 
     GET / HTTP/1.1
@@ -583,6 +696,20 @@ the connection will be closed after completion of the response. For example,
 HTTP/1.1 applications that do not support persistent connections MUST include
 the "close" connection option in every message.
 
+Security Considerations for Response Processing:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Response Splitting:
+    - Unvalidated input reflected in response headers can split response
+    - Can lead to cache poisoning and XSS
+    - Requires strict output encoding of header values
+
+* Cache Poisoning:
+    - Inconsistent cache key generation enables cache poisoning
+    - Variations in header handling between cache and origin
+    - Web Cache Deception through path confusion
+    - Requires careful cache configuration and validation
+
 After sending the request and headers, the web browser sends a single blank
 newline to the server indicating that the content of the request is done.
 
@@ -596,6 +723,21 @@ Followed by a single newline, and then sends a payload of the HTML content of
 ``www.google.com``. The server may then either close the connection, or if
 headers sent by the client requested it, keep the connection open to be reused
 for further requests.
+
+Security Considerations for Connection Handling:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Connection State Attacks:
+    - HTTP Request Pipelining attacks
+    - TCP connection reuse vulnerabilities
+    - Slow HTTP DoS attacks (Slowloris)
+    - Requires connection timeouts and request rate limiting
+
+* Resource Exhaustion:
+    - Keep-alive abuse
+    - Concurrent connection flooding
+    - Large request body DoS
+    - Needs proper resource limits and monitoring
 
 If the HTTP headers sent by the web browser included sufficient information for
 the webserver to determine if the version of the file cached by the web
@@ -618,6 +760,21 @@ If the HTML referenced a resource on a different domain than
 resolving the other domain, and follows all steps up to this point for that
 domain. The ``Host`` header in the request will be set to the appropriate
 server name instead of ``google.com``.
+
+HTTP Security Considerations:
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Request/Response Attacks:
+    - HTTP request smuggling through inconsistent parsing
+    - Response splitting via header injection
+    - Cache poisoning through header manipulation
+    - Requires careful request validation and parser alignment
+
+* Connection Hardening:
+    - Set appropriate connection timeouts
+    - Implement request rate limiting
+    - Validate all connection state transitions
+    - Monitor for anomalous connection patterns
 
 HTTP Server Request Handle
 --------------------------
