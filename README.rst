@@ -204,7 +204,12 @@ DNS lookup
 
 * Browser checks if the domain is in its cache. (to see the DNS Cache in
   Chrome, go to `chrome://net-internals/#dns <chrome://net-internals/#dns>`_).
-* If not found, the browser calls ``gethostbyname`` library function (varies by
+
+* Modern browsers first attempt secure DNS resolution using DNS-over-HTTPS (DoH) 
+  or DNS-over-TLS (DoT). See `Modern DNS and Transport Protocols`_ below for 
+  detailed protocol specifications.
+
+* If secure DNS fails, the browser calls ``gethostbyname`` library function (varies by
   OS) to do the lookup.
 * ``gethostbyname`` checks if the hostname can be resolved by reference in the
   local ``hosts`` file (whose location `varies by OS`_) before trying to
@@ -419,11 +424,12 @@ the default gateway it can resume its DNS process:
 
 Opening of a socket
 -------------------
-Once the browser receives the IP address of the destination server, it takes
-that and the given port number from the URL (the HTTP protocol defaults to port
-80, and HTTPS to port 443), and makes a call to the system library function
-named ``socket`` and requests a TCP socket stream - ``AF_INET/AF_INET6`` and
-``SOCK_STREAM``.
+Once the browser receives the IP address of the destination server, it attempts
+to establish a connection. Modern browsers will first try HTTP/3 using QUIC
+(see `HTTP/3 and QUIC Transport`_ section for detailed protocol specifications)
+before falling back to traditional TCP connections.
+
+When using traditional TCP:
 
 * This request is first passed to the Transport Layer where a TCP segment is
   crafted. The destination port is added to the header, and a source port is
