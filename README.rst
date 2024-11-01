@@ -649,18 +649,21 @@ and IIS for Windows.
   is running on PHP, the server uses PHP to interpret the index file, and
   streams the output to the client.
 
-Behind the scenes of the Browser
+Browser Processing and Rendering
 ----------------------------------
 
-Once the server supplies the resources (HTML, CSS, JS, images, etc.)
-to the browser it undergoes the below process:
+Once the server supplies the resources (HTML, CSS, JS, images, etc.), 
+the browser begins its core processing and rendering workflow:
 
-* Parsing - HTML, CSS, JS
-* Rendering - Construct DOM Tree → Render Tree → Layout of Render Tree →
-  Painting the render tree
+* Initial Processing:
+    - Parse HTML, CSS, and JavaScript
+    - Construct DOM Tree
+    - Build Render Tree 
+    - Calculate Layout
+    - Paint to Screen
 
-Browser
--------
+Browser Architecture
+-------------------
 
 The browser's functionality is to present the web resource you choose, by
 requesting it from the server and displaying it in the browser window.
