@@ -6,17 +6,10 @@ happens when you type google.com into your browser's address box and press
 enter?"
 
 Except instead of the usual story, we're going to try to answer this question
-in as much detail as possible. No skipping out on anything.
-
-This is a collaborative process, so dig in and try to help out! There are tons
-of details missing, just waiting for you to add them! So send us a pull
-request, please!
+in as much detail as possible. No skipping out on anything. In this particular
+version we aim to capture the security aspects of the process.
 
 This is all licensed under the terms of the `Creative Commons Zero`_ license.
-
-Read this in `简体中文`_ (simplified Chinese), `日本語`_ (Japanese), `한국어`_
-(Korean) and `Spanish`_. NOTE: these have not been reviewed by the alex/what-happens-when
-maintainers.
 
 Table of Contents
 ====================
@@ -223,7 +216,134 @@ DNS lookup
   ``ARP process`` below for the DNS server.
 * If the DNS server is on a different subnet, the network library follows
   the ``ARP process`` below for the default gateway IP.
+  
+Modern DNS and Transport Protocols
+--------------------------------
 
+Before proceeding with traditional DNS resolution, modern browsers implement additional security and performance protocols:
+
+DNS-over-HTTPS (DoH)
+~~~~~~~~~~~~~~~~~~~~
+
+Modern browsers may attempt to resolve DNS using HTTPS:
+
+* Browser sends DNS queries over HTTPS (port 443) to a configured resolver
+* Each query is formatted as an HTTPS POST request:
+    * URL: ``https://resolver/dns-query`` (e.g., ``https://1.1.1.1/dns-query``)
+    * Content-Type: ``application/dns-message``
+    * Accept: ``application/dns-message``
+    * Body: DNS Wire Format query
+
+Example DoH message structure::
+
+    POST /dns-query HTTP/2
+    Host: resolver.example
+    Content-Type: application/dns-message
+    Content-Length: <length>
+    Accept: application/dns-message
+
+    <DNS Wire Format Message>
+
+DNS-over-TLS (DoT)
+~~~~~~~~~~~~~~~~~
+
+As an alternative to DoH, some systems use DoT:
+
+* Opens dedicated TLS connection to resolver on port 853
+* Each message prefixed with 2-byte length field
+* Full TLS certificate validation required
+
+Example DoT message format::
+
+    +------------------------+
+    |   Message Length (2)   |
+    +------------------------+
+    |   DNS Message Header   |
+    +------------------------+
+    |   DNS Question (*)     |
+    +------------------------+
+    |   DNS Answer (*)       |
+    +------------------------+
+    |   DNS Authority (*)    |
+    +------------------------+
+    |   DNS Additional (*)   |
+    +------------------------+
+
+* Message Length: 2-byte prefix specific to DoT for message framing
+* DNS Message Header: Contains query ID, flags, and section counts (12 bytes)
+* DNS Question: The actual query (e.g., "what is the A record for google.com?")
+* DNS Answer: Contains the response records (only in server responses)
+* DNS Authority: Contains authoritative nameserver records (if needed)
+* DNS Additional: Contains supplementary records (if needed)
+
+HTTP/3 and QUIC Transport
+~~~~~~~~~~~~~~~~~~~~~~~
+
+During the connection phase, modern browsers attempt HTTP/3 using QUIC:
+
+* QUIC Connection Establishment:
+    1. Initial packet contains QUIC version negotiation
+    2. Client sends Initial packet with CRYPTO frame containing TLS ClientHello
+    3. Server responds with Initial packet containing TLS ServerHello
+    4. 0-RTT data may be sent if previous session ticket exists
+
+* QUIC packet structure::
+
+    +---------------------+
+    |   Header Form (1)   |
+    +---------------------+
+    |     Version (4)     |
+    +---------------------+
+    |  Destination ID (*) |
+    +---------------------+
+    |    Source ID (*)    |
+    +---------------------+
+    |    Payload (*)      |
+    +---------------------+
+
+* Stream Multiplexing:
+    * Each stream has a unique ID
+    * Streams can be:
+        * Bidirectional (client or server initiated)
+        * Unidirectional (single direction only)
+    * Flow control occurs at both stream and connection levels
+
+* Connection Migration:
+    * Client maintains Connection ID across network changes
+    * Server can validate client IP address changes
+    * Migration occurs without breaking encryption state
+
+Fallback Mechanisms
+~~~~~~~~~~~~~~~~~
+
+The browser implements specific fallback behaviors:
+
+1. DNS Resolution Fallback:
+    * DoH attempt fails → Try DoT
+    * DoT fails → Traditional DNS (UDP/TCP 53)
+    * Each fallback includes timeout thresholds
+
+2. Transport Protocol Fallback:
+    * HTTP/3 not supported → Try HTTP/2
+    * HTTP/2 not supported → Fallback to HTTP/1.1
+    * Each attempt includes protocol discovery via Alt-Svc headers
+
+Performance Implications
+~~~~~~~~~~~~~~~~~~~~~~
+
+These modern protocols affect connection metrics:
+
+* Initial connection overhead:
+    * DoH: Additional HTTPS overhead
+    * DoT: TLS handshake overhead
+    * QUIC: Reduced due to 0-RTT capability
+
+* Subsequent requests:
+    * Connection reuse reduces overhead
+    * Multiplexing eliminates head-of-line blocking
+    * Migration capabilities improve mobile performance
+
+The browser maintains statistics about protocol success rates and adjusts fallback behavior accordingly.
 
 ARP process
 -----------
