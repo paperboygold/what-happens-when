@@ -558,11 +558,10 @@ HTTP protocol
 -------------
 
 If the web browser used was written by Google, instead of sending an HTTP
-request to retrieve the page, it will send a request to try and negotiate with
-the server an "upgrade" from HTTP to the SPDY protocol.
+request to retrieve the page, it will first attempt to negotiate HTTP/3, 
+then fall back to HTTP/2, and finally HTTP/1.1 if needed.
 
-If the client is using the HTTP protocol and does not support SPDY, it sends a
-request to the server of the form::
+If the client is using HTTP/1.1, it sends a request to the server of the form:
 
     GET / HTTP/1.1
     Host: google.com
@@ -671,8 +670,9 @@ specified by the user using a URI (Uniform Resource Identifier).
 
 The way the browser interprets and displays HTML files is specified
 in the HTML and CSS specifications. These specifications are maintained
-by the W3C (World Wide Web Consortium) organization, which is the
-standards organization for the web.
+jointly by the WHATWG (Web Hypertext Application Technology Working Group) 
+and W3C (World Wide Web Consortium) organizations. WHATWG maintains the 
+living standard for HTML while W3C provides periodic snapshot specifications.
 
 Browser user interfaces have a lot in common with each other. Among the
 common user interface elements are:
